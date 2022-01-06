@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import ugettext as _
 
 from accounts.models import User
+from accounts.queries import get_deleted_user
 from helpers.models import TimestampModel
 
 
@@ -20,7 +21,7 @@ class Topic(TimestampModel):
     description = models.CharField(_('description'), max_length=255)
     author = models.ForeignKey(
         User,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.SET(get_deleted_user),
         verbose_name=_('author'),
         related_name='topics',
     )

@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import ugettext as _
 
 from accounts.models import User
+from accounts.queries import get_deleted_user
 from topics.models import Topic
 from helpers.models import TimestampModel, VotesModel
 
@@ -24,7 +25,7 @@ class Post(TimestampModel, VotesModel):
     content = models.TextField(_('content'))
     author = models.ForeignKey(
         User,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.SET(get_deleted_user),
         verbose_name=_('author'),
         related_name='posts',
     )

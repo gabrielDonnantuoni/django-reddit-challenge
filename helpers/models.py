@@ -7,6 +7,8 @@ Model helper
 from django.db import models
 from django.utils.translation import ugettext as _
 
+from helpers.services import VotesModelMixin
+
 
 ###
 # Helpers
@@ -34,9 +36,17 @@ class TimestampModel(models.Model):
     )
 
 
-class VotesModel(models.Model):
+class VotesModel(VotesModelMixin, models.Model):
     class Meta:
         abstract = True
 
-    up_votes = models.IntegerField(_('up vote'))
-    down_votes = models.IntegerField(_('down vote'))
+    up_votes = models.ManyToManyField(
+        'accounts.User',
+        related_name='%(class)s_up_votes',
+        verbose_name=_('up vote'),
+    )
+    down_votes = models.ManyToManyField(
+        'accounts.User',
+        related_name='%(class)s_down_votes',
+        verbose_name=_('up vote'),
+    )
