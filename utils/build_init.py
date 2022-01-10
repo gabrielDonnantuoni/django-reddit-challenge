@@ -28,9 +28,12 @@ def build_init(package_path: str) -> None:
     with init_path.open('w') as file:
         def dict_with_pascal_and_snake(module: Path):
             without_suffix = module.stem
+            to_pascal = without_suffix
+            if 'viewset' in without_suffix:
+                to_pascal = without_suffix.replace('viewset', 'view_set')
             return {
                 'snake': without_suffix,
-                'pascal': cc.snake_to_pascal(without_suffix),
+                'pascal': cc.snake_to_pascal(to_pascal),
             }
 
         modules = [
@@ -48,7 +51,7 @@ def build_init(package_path: str) -> None:
 
         for module in modules:
             pascal = module['pascal']
-            file.write(f"   '{pascal}',\n")
+            file.write(f"    '{pascal}',\n")
         file.write(']\n')
 
 
