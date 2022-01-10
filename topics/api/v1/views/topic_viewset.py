@@ -12,6 +12,7 @@ from topics.api.v1.serializers import (
     TopicDetailSerializer,
 )
 from helpers.permissions import IsOwnerOrReadOnly
+from helpers.services import DeleteService
 
 
 ###
@@ -32,3 +33,6 @@ class TopicViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def perform_destroy(self, instance):
+        DeleteService(instance).update_author_to_deleted()

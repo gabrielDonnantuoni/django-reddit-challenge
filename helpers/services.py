@@ -1,10 +1,12 @@
 from django.db.models import Count, Exists, OuterRef
 
+from accounts.queries import get_deleted_user
+
 
 class VotesService:
-    def __init__(self, obj=None, model=None, user=None):
+    def __init__(self, obj=None, qs=None, user=None):
         self.obj = obj
-        self.model = model or self.obj.__class__
+        self.qs = qs or self.obj.model.objects.all()
         self.user = user
 
     def add_up_vote(self):
@@ -26,7 +28,7 @@ class VotesService:
         self.obj.down_votes.remove(self.user)
 
     def get_votes_count_query(self):
-        return self.model.objects.annotate(
+        return self.qs.annotate(
             up_votes_count=Count('up_votes'),
             down_votes_count=Count('down_votes'),
         )
@@ -34,11 +36,11 @@ class VotesService:
     def get_vote_acknowledged_query(self):
         qs = self.get_votes_count_query()
 
-        user_up_voted = self.model.objects.filter(
+        user_up_voted = self.qs.filter(
             up_votes=self.user,
             id=OuterRef('id'),
         )
-        user_down_voted = self.model.objects.filter(
+        user_down_voted = self.qs.filter(
             down_votes=self.user,
             id=OuterRef('id'),
         )
@@ -46,3 +48,12 @@ class VotesService:
             is_up_voted=Exists(user_up_voted),
             is_down_voted=Exists(user_down_voted),
         )
+
+
+class DeleteService:
+    def __init__(self, obj):
+        self.obj = obj
+
+    def update_author_to_deleted(self):
+        self.obj.author = get_deleted_user()
+        self.obj.save()
