@@ -7,8 +7,6 @@ Model helper
 from django.db import models
 from django.utils.translation import ugettext as _
 
-from helpers.services import VotesModelMixin
-
 
 ###
 # Helpers
@@ -36,7 +34,7 @@ class TimestampModel(models.Model):
     )
 
 
-class VotesModel(VotesModelMixin, models.Model):
+class VotesModel(models.Model):
     class Meta:
         abstract = True
 

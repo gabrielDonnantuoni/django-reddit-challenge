@@ -41,6 +41,5 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(helpers.services.VotesModelMixin, models.Model),
         ),
     ]

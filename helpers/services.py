@@ -1,26 +1,48 @@
-class VotesModelMixin:
-    @property
-    def up_votes_count(self):
-        return self.up_votes.all().count()
+from django.db.models import Count, Exists, OuterRef
 
-    @property
-    def down_votes_count(self):
-        return self.down_votes.all().count()
 
-    def add_up_vote(self, user):
-        if self.down_votes.filter(id=user.id).exists():
-            self.remove_down_vote(user)
+class VotesService:
+    def __init__(self, obj=None, model=None, user=None):
+        self.obj = obj
+        self.model = model or self.obj.__class__
+        self.user = user
 
-        self.up_votes.add(user)
+    def add_up_vote(self):
+        if self.obj.is_down_voted:
+            self.remove_down_vote()
 
-    def remove_up_vote(self, user):
-        self.up_votes.remove(user)
+        self.obj.up_votes.add(self.user)
 
-    def add_down_vote(self, user):
-        if self.up_votes.filter(id=user.id).exists():
-            self.remove_up_vote(user)
+    def remove_up_vote(self):
+        self.obj.up_votes.remove(self.user)
 
-        self.down_votes.add(user)
+    def add_down_vote(self):
+        if self.obj.is_up_voted:
+            self.remove_up_vote()
 
-    def remove_down_vote(self, user):
-        self.down_votes.remove(user)
+        self.obj.down_votes.add(self.user)
+
+    def remove_down_vote(self):
+        self.obj.down_votes.remove(self.user)
+
+    def get_votes_count_query(self):
+        return self.model.objects.annotate(
+            up_votes_count=Count('up_votes'),
+            down_votes_count=Count('down_votes'),
+        )
+
+    def get_vote_acknowledged_query(self):
+        qs = self.get_votes_count_query()
+
+        user_up_voted = self.model.objects.filter(
+            up_votes=self.user,
+            id=OuterRef('id'),
+        )
+        user_down_voted = self.model.objects.filter(
+            down_votes=self.user,
+            id=OuterRef('id'),
+        )
+        return qs.annotate(
+            is_up_voted=Exists(user_up_voted),
+            is_down_voted=Exists(user_down_voted),
+        )
