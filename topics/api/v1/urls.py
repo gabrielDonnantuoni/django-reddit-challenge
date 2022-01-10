@@ -7,11 +7,13 @@ Topics URL Configuration
 from django.conf.urls import url, include
 from rest_framework_nested.routers import DefaultRouter, NestedSimpleRouter
 
+from topics.api.v1.views import TopicViewSet
 
 ###
 # Routers
 ###
 router = DefaultRouter()
+router.register('topics', TopicViewSet)
 
 
 ###
