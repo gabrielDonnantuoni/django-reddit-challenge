@@ -5,16 +5,15 @@ API V1: Post List Serializer
 # Libraries
 ###
 from posts.models import Post
-from rest_framework import serializers
+# from rest_framework import serializers
+
+from helpers.serializers import VotesSerializer
 
 
 ###
 # Serializer
 ###
-class PostListSerializer(serializers.ModelSerializer):
-    up_votes = serializers.IntegerField(source='up_votes_count')
-    down_votes = serializers.IntegerField(source='down_votes_count')
-
+class PostListSerializer(VotesSerializer):
     class Meta:
         model = Post
-        fields = ('id', 'title', 'up_votes', 'down_votes')
+        fields = ('id', 'title', 'up_votes', 'down_votes', 'user_vote_status')

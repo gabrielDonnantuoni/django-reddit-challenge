@@ -17,17 +17,19 @@ from helpers.services import VotesService
 ###
 class TopicDetailSerializer(serializers.ModelSerializer):
     author = NameRelatedField(read_only=True, lookup='username')
-    better_rated_posts = serializers.SerializerMethodField()
+    top_posts = serializers.SerializerMethodField()
 
     class Meta:
         model = Topic
         fields = (
             'slug', 'title', 'description', 'author',
-            'better_rated_posts',
+            'top_posts',
         )
 
-    def get_better_rated_posts(self, obj):
-        qs = VotesService(qs=obj.posts.all()).get_votes_count_query()
+    def get_top_posts(self, obj):
+        request = self.context['request']
+        qs = obj.posts.all()
+        qs = VotesService(queryset=qs).get_query_by_request(request)
         qs = qs.order_by('-up_votes_count')[:5]
         return PostListSerializer(
             instance=qs,

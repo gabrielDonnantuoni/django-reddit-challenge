@@ -25,15 +25,19 @@ class PostDetailSerializer(PostListSerializer):
     class Meta:
         model = Post
         fields = (
-            'id', 'title', 'content', 'author', 'tags', 'up_votes',
-            'down_votes', 'created_at', 'updated_at', 'top_comments',
+            'id', 'title', 'content', 'author', 'up_votes',
+            'down_votes', 'user_vote_status', 'tags',
+            'created_at', 'updated_at', 'top_comments',
         )
+        read_only_fields = ('created_at', 'updated_at')
 
     def get_top_comments(self, obj):
+        request = self.context['request']
         qs = obj.comments.filter(parent_comment__isnull=True)
-        qs = VotesService(qs=qs).get_votes_count_query()
+        qs = VotesService(queryset=qs).get_query_by_request(request)
         qs = qs.order_by('-up_votes_count')[:5]
         return CommentListSerializer(
             instance=qs,
             many=True,
+            context={'request': request},
         ).data

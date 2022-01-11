@@ -8,23 +8,28 @@ from comments.models import Comment
 from rest_framework import serializers
 
 from helpers.services import VotesService
+from helpers.serializers import VotesSerializer
 
 
 ###
 # Serializer
 ###
-class CommentListSerializer(serializers.ModelSerializer):
-    up_votes = serializers.IntegerField(source='up_votes_count')
-    down_votes = serializers.IntegerField(source='down_votes_count')
+class CommentListSerializer(VotesSerializer):
     replies = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ('id', 'content', 'up_votes', 'down_votes', 'replies')
+        fields = (
+            'id', 'content', 'up_votes', 'down_votes',
+            'user_vote_status', 'replies',
+        )
 
     def get_replies(self, obj):
-        qs = VotesService(qs=obj.replies.all()).get_votes_count_query()
+        request = self.context['request']
+        qs = obj.replies.all()
+        qs = VotesService(queryset=qs).get_query_by_request(request)
         return CommentListSerializer(
             instance=qs,
             many=True,
+            context={'request': request},
         ).data
