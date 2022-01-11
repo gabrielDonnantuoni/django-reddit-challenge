@@ -6,7 +6,7 @@ from accounts.queries import get_deleted_user
 class VotesService:
     def __init__(self, obj=None, qs=None, user=None):
         self.obj = obj
-        self.qs = qs or self.obj.model.objects.all()
+        self.qs = qs if qs is not None else self.obj.model.objects.all()
         self.user = user
 
     def add_up_vote(self):
