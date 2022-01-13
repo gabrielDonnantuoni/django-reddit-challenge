@@ -23,30 +23,18 @@ class VotesService:
             self.remove_down_vote()
 
         self.obj.up_votes.add(self.user)
-        self.obj.up_votes_count += 1
-        self.obj.is_up_voted = True
-        return self.obj
 
     def remove_up_vote(self):
         self.obj.up_votes.remove(self.user)
-        self.obj.up_votes_count -= 1
-        self.obj.is_up_voted = False
-        return self.obj
 
     def add_down_vote(self):
         if self.obj.is_up_voted:
             self.remove_up_vote()
 
         self.obj.down_votes.add(self.user)
-        self.obj.down_votes_count += 1
-        self.obj.is_down_voted = True
-        return self.obj
 
     def remove_down_vote(self):
         self.obj.down_votes.remove(self.user)
-        self.obj.down_votes_count -= 1
-        self.obj.is_down_voted = False
-        return self.obj
 
     def get_votes_count_query(self):
         return self.queryset.annotate(
